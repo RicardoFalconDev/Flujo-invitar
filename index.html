@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flujo Invitar — FID by Lakaut</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f0f2f7; min-height: 100vh; padding: 40px 24px; }
+    h1 { font-size: 22px; font-weight: 700; color: #0b0c0e; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: #6c757d; margin-bottom: 32px; }
+    .section-title { font-size: 11px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    a.card { background: #fff; border: 1px solid #e1e1eb; border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; transition: box-shadow .15s; }
+    a.card:hover { box-shadow: 0 4px 16px rgba(42,57,208,.1); border-color: #c0c5f0; }
+    .card-icon { width: 36px; height: 36px; border-radius: 8px; background: #2A39D0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-icon .icon { font-family: 'Material Symbols Outlined'; font-size: 20px; color: #fff; }
+    .card-text { flex: 1; }
+    .card-name { font-weight: 600; font-size: 14px; color: #0b0c0e; }
+    .card-file { font-size: 12px; color: #6c757d; margin-top: 2px; }
+    .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+    .badge.new { background: #e6f7ee; color: #1a7a45; }
+    .badge.mod { background: #fff3e0; color: #b45309; }
+  </style>
+</head>
+<body>
+  <h1>Flujo Invitar</h1>
+  <p class="subtitle">FID by Lakaut — Prototipo de flujo de firmas en secuencia</p>
+
+  <p class="section-title">Flujo A — Yo firmo + invito</p>
+  <div class="grid">
+    <a class="card" href="firma-exitosa.html">
+      <div class="card-icon"><span class="icon">task_alt</span></div>
+      <div class="card-text">
+        <p class="card-name">Firma exitosa <span class="badge mod">mod</span></p>
+        <p class="card-file">firma-exitosa.html</p>
+      </div>
+    </a>
+    <a class="card" href="invitar-firmantes.html">
+      <div class="card-icon"><span class="icon">group_add</span></div>
+      <div class="card-text">
+        <p class="card-name">Invitar firmantes <span class="badge new">nuevo</span></p>
+        <p class="card-file">invitar-firmantes.html</p>
+      </div>
+    </a>
+    <a class="card" href="confirmar-envio.html">
+      <div class="card-icon"><span class="icon">send</span></div>
+      <div class="card-text">
+        <p class="card-name">Confirmar envío <span class="badge new">nuevo</span></p>
+        <p class="card-file">confirmar-envio.html</p>
+      </div>
+    </a>
+    <a class="card" href="envio-exitoso.html">
+      <div class="card-icon"><span class="icon">mark_email_read</span></div>
+      <div class="card-text">
+        <p class="card-name">Envío exitoso <span class="badge new">nuevo</span></p>
+        <p class="card-file">envio-exitoso.html</p>
+      </div>
+    </a>
+  </div>
+
+  <p class="section-title">Flujo B — Solo invito (próximamente)</p>
+  <div class="grid">
+    <a class="card" href="cargar-documento.html" style="opacity:.5;pointer-events:none">
+      <div class="card-icon"><span class="icon">upload_file</span></div>
+      <div class="card-text">
+        <p class="card-name">Cargar documento <span class="badge new">nuevo</span></p>
+        <p class="card-file">cargar-documento.html</p>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

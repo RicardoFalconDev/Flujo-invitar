@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Envío exitoso | FID by Lakaut</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/header.css" />
+  <link rel="stylesheet" href="assets/css/buttons.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+
+  <style>
+    body, .page { background: #f8f9fa; }
+
+    .success-card {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--border-card);
+      border-radius: 12px 12px 0 0;
+      padding: 52px 24px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 657px;
+    }
+
+    .success-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+
+    .lottie-wrap {
+      width: 160px;
+      height: 160px;
+      flex-shrink: 0;
+    }
+
+    .success-title {
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 30px;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .success-subtitle {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-sub);
+      letter-spacing: 0.1px;
+      margin: 6px 0 0;
+    }
+
+    /* ── Resumen mini de firmantes ── */
+    .signers-summary {
+      width: 100%;
+      background: #f9f9ff;
+      border: 1px solid #e0e2f5;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .summary-title {
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 11px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .summary-email {
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-dark);
+      font-weight: 500;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-status .icon {
+      font-size: 16px;
+    }
+
+    .summary-status.sent .icon { color: #1a7a45; }
+    .summary-status.pending .icon { color: #b45309; }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .actions button { width: 100%; }
+
+    .success-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      .success-card { flex: 1; padding: 32px 16px 24px; min-height: unset; justify-content: flex-start; align-items: stretch; }
+      .success-inner { flex: 1; max-width: 100%; justify-content: space-between; }
+      .success-content { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <img class="header-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
+    <span class="header-title"><span class="header-title-skeleton"></span></span>
+    <button class="icon-btn" aria-label="Cerrar" onclick="window.location.href='index.html'">
+      <span class="icon">close</span>
+    </button>
+  </header>
+
+  <!-- ── CONTENT ── -->
+  <main class="content-area">
+  <div class="card-wrap">
+    <div class="success-card">
+      <div class="success-inner">
+
+        <div class="success-content">
+          <div class="lottie-wrap" id="lottie-anim"></div>
+
+          <div>
+            <p class="success-title">Invitaciones enviadas</p>
+            <p class="success-subtitle">Cada firmante recibirá una notificación cuando llegue su turno.</p>
+          </div>
+
+          <div class="signers-summary" id="signers-summary">
+            <!-- poblado por JS -->
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary active" onclick="window.location.href='index.html'">
+            <span>Ir al inicio</span>
+          </button>
+          <button class="btn-outline" onclick="descargar()">
+            <span>Descargar documento</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-footer">
+      <span class="powered-label">POWERED BY</span>
+      <img class="powered-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
+    </div>
+  </div>
+  </main>
+
+</div>
+
+<script>
+  function init() {
+    const raw = sessionStorage.getItem('firmantes');
+    const firmantes = raw ? JSON.parse(raw) : [
+      { email: 'isacris23@gmail.com', tieneCuenta: true },
+      { email: 'pedro@empresa.com', tieneCuenta: false },
+    ];
+
+    const container = document.getElementById('signers-summary');
+    container.innerHTML = `
+      <span class="summary-title">Secuencia de firma</span>
+      ${firmantes.map((f, i) => `
+        <div class="summary-row">
+          <div class="summary-num">${i + 1}</div>
+          <span class="summary-email">${f.email}</span>
+          <span class="summary-status ${f.tieneCuenta ? 'sent' : 'pending'}">
+            <span class="icon">${f.tieneCuenta ? 'check_circle' : 'schedule'}</span>
+          </span>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function descargar() {
+    const btn = document.querySelectorAll('.btn-outline')[0];
+    btn.innerHTML = '<span>Descargando…</span>';
+    setTimeout(() => { btn.innerHTML = '<span>Descargar documento</span>'; }, 1500);
+  }
+
+  init();
+</script>
+<script>
+  lottie.loadAnimation({ container: document.getElementById('lottie-anim'), renderer: 'svg', loop: false, autoplay: true, path: 'assets/success-check.json' });
+</script>
+</body>
+</html>

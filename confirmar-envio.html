@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Confirmar envío | FID by Lakaut</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/header.css" />
+  <link rel="stylesheet" href="assets/css/buttons.css" />
+
+  <style>
+    body, .page { background: #f8f9fa; }
+
+    /* ── Documento card ── */
+    .doc-preview {
+      background: #f0f4ff;
+      border: 1px solid #d0d4f7;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .doc-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .doc-icon .icon { color: #fff; font-size: 22px; }
+
+    .doc-meta { flex: 1; min-width: 0; }
+
+    .doc-name {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+
+    .doc-size {
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--text-sub);
+      margin: 2px 0 0;
+    }
+
+    /* ── Sección firmantes ── */
+    .section-label {
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Línea de secuencia ── */
+    .signer-sequence {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .seq-item {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .seq-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 28px;
+      flex-shrink: 0;
+    }
+
+    .seq-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .seq-line {
+      width: 2px;
+      flex: 1;
+      background: #d0d4f7;
+      min-height: 12px;
+    }
+
+    .seq-item:last-child .seq-line { display: none; }
+
+    .seq-right {
+      flex: 1;
+      padding-bottom: 14px;
+    }
+
+    .seq-item:last-child .seq-right { padding-bottom: 0; }
+
+    .seq-email {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 28px;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .seq-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .seq-badge.has-cert { background: #e6f7ee; color: #1a7a45; }
+    .seq-badge.no-cert { background: #fff3e0; color: #b45309; }
+    .seq-badge .icon { font-size: 12px; }
+
+    /* ── Aviso de no-cert ── */
+    .warn-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #fff8ed;
+      border: 1px solid #f7d28a;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .warn-note .icon { font-size: 16px; color: #b45309; flex-shrink: 0; margin-top: 1px; }
+    .warn-note p { font-size: 13px; line-height: 18px; color: #6b3a00; margin: 0; }
+
+    /* ── Footer ── */
+    .footer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-actions button { width: 100%; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <img class="header-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
+    <span class="header-title">Confirmar envío</span>
+    <button class="icon-btn" aria-label="Cerrar" onclick="window.history.back()">
+      <span class="icon">close</span>
+    </button>
+  </header>
+
+  <!-- ── CONTENT ── -->
+  <main class="content-area">
+  <div class="card-wrap">
+    <div class="main-card">
+
+      <div class="title-section">
+        <h1 class="card-title">Revisá antes de enviar</h1>
+        <p class="card-subtitle">Confirmá el documento y el orden de firmas. Una vez enviado, cada persona recibirá una notificación en su turno.</p>
+      </div>
+
+      <!-- Documento -->
+      <div>
+        <p class="section-label">Documento</p>
+        <div class="doc-preview">
+          <div class="doc-icon"><span class="icon">description</span></div>
+          <div class="doc-meta">
+            <p class="doc-name" id="doc-name">Contrato_servicio_2026.pdf</p>
+            <p class="doc-size" id="doc-size">PDF · 1.2 MB</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firmantes en secuencia -->
+      <div>
+        <p class="section-label">Orden de firma</p>
+        <div class="signer-sequence" id="signer-sequence">
+          <!-- poblado por JS -->
+        </div>
+      </div>
+
+      <!-- Aviso si hay alguien sin cuenta -->
+      <div class="warn-note" id="warn-note" style="display:none">
+        <span class="icon">warning</span>
+        <p>Algunas personas recibirán primero una invitación para obtener su certificado FID antes de poder firmar.</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="footer-actions">
+        <button class="btn-primary active" onclick="enviar()">
+          <span>Confirmar y enviar</span>
+        </button>
+        <button class="btn-outline" onclick="window.history.back()">
+          <span>Editar firmantes</span>
+        </button>
+      </div>
+
+    </div>
+    <div class="card-footer">
+      <span class="powered-label">POWERED BY</span>
+      <img class="powered-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
+    </div>
+  </div>
+  </main>
+
+</div>
+
+<script>
+  function init() {
+    const raw = sessionStorage.getItem('firmantes');
+    const firmantes = raw ? JSON.parse(raw) : [
+      { email: 'isacris23@gmail.com', tieneCuenta: true },
+      { email: 'pedro@empresa.com', tieneCuenta: false },
+    ];
+
+    const seq = document.getElementById('signer-sequence');
+    seq.innerHTML = firmantes.map((f, i) => `
+      <div class="seq-item">
+        <div class="seq-left">
+          <div class="seq-num">${i + 1}</div>
+          <div class="seq-line"></div>
+        </div>
+        <div class="seq-right">
+          <p class="seq-email">${f.email}</p>
+          <span class="seq-badge ${f.tieneCuenta ? 'has-cert' : 'no-cert'}">
+            <span class="icon">${f.tieneCuenta ? 'verified' : 'mail'}</span>
+            ${f.tieneCuenta ? 'Tiene cuenta FID' : 'Recibirá invitación de registro'}
+          </span>
+        </div>
+      </div>
+    `).join('');
+
+    const hayNoCert = firmantes.some(f => !f.tieneCuenta);
+    document.getElementById('warn-note').style.display = hayNoCert ? 'flex' : 'none';
+
+    // Nombre del doc desde sessionStorage si existe
+    const docName = sessionStorage.getItem('doc_name');
+    if (docName) document.getElementById('doc-name').textContent = docName;
+  }
+
+  function enviar() {
+    const btn = document.querySelector('.btn-primary');
+    btn.innerHTML = '<span>Enviando…</span>';
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+
+    setTimeout(() => {
+      window.location.href = 'envio-exitoso.html';
+    }, 1200);
+  }
+
+  init();
+</script>
+</body>
+</html>
