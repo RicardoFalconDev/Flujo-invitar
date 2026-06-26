@@ -180,25 +180,21 @@
     .signer-controls {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
-    .order-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: #fff;
+    .drag-handle {
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background .15s;
+      cursor: grab;
+      padding: 4px;
+      color: #b0b5c8;
+      touch-action: none;
     }
-
-    .order-btn:hover { background: var(--bg-sidebar); }
-    .order-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .order-btn .icon { font-size: 16px; color: var(--text-sub); }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle .icon { font-size: 20px; }
 
     .remove-btn {
       width: 28px;
@@ -210,11 +206,19 @@
       align-items: center;
       justify-content: center;
       transition: background .15s;
-      margin-left: 4px;
     }
 
     .remove-btn:hover { background: #fff0f0; }
-    .remove-btn .icon { font-size: 16px; color: #d0370a; }
+    .remove-btn .icon { font-size: 18px; color: #d0370a; }
+
+    /* Item siendo arrastrado */
+    .signer-item.dragging {
+      opacity: 0.4;
+    }
+    .signer-item.drag-over {
+      border-color: var(--blue);
+      background: #f0f2ff;
+    }
 
     /* ── Empty state ── */
     .empty-state {
@@ -426,16 +430,37 @@
     el.classList.add('visible');
   }
 
-  function moverArriba(idx) {
-    if (idx === 0) return;
-    [firmantes[idx - 1], firmantes[idx]] = [firmantes[idx], firmantes[idx - 1]];
-    renderFirmantes();
-  }
+  let dragSrcIdx = null;
 
-  function moverAbajo(idx) {
-    if (idx === firmantes.length - 1) return;
-    [firmantes[idx], firmantes[idx + 1]] = [firmantes[idx + 1], firmantes[idx]];
-    renderFirmantes();
+  function initDragSort() {
+    const items = document.querySelectorAll('.signer-item[draggable]');
+    items.forEach(item => {
+      item.addEventListener('dragstart', e => {
+        dragSrcIdx = parseInt(item.dataset.idx);
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.signer-item').forEach(i => i.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+      });
+      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        const targetIdx = parseInt(item.dataset.idx);
+        if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+        const moved = firmantes.splice(dragSrcIdx, 1)[0];
+        firmantes.splice(targetIdx, 0, moved);
+        dragSrcIdx = null;
+        renderFirmantes();
+      });
+    });
   }
 
   function eliminar(idx) {
@@ -455,7 +480,7 @@
     }
 
     list.innerHTML = firmantes.map((f, i) => `
-      <div class="signer-item">
+      <div class="signer-item" draggable="true" data-idx="${i}">
         <div class="signer-order">${i + 1}</div>
         <div class="signer-info">
           <p class="signer-email">${f.email}</p>
@@ -465,18 +490,16 @@
           </span>
         </div>
         <div class="signer-controls">
-          <button class="order-btn" onclick="moverArriba(${i})" ${i === 0 ? 'disabled' : ''} aria-label="Mover arriba">
-            <span class="icon">arrow_upward</span>
-          </button>
-          <button class="order-btn" onclick="moverAbajo(${i})" ${i === firmantes.length - 1 ? 'disabled' : ''} aria-label="Mover abajo">
-            <span class="icon">arrow_downward</span>
-          </button>
+          <div class="drag-handle" aria-label="Arrastrar para reordenar">
+            <span class="icon">drag_indicator</span>
+          </div>
           <button class="remove-btn" onclick="eliminar(${i})" aria-label="Eliminar">
-            <span class="icon">close</span>
+            <span class="icon">delete</span>
           </button>
         </div>
       </div>
     `).join('');
+    initDragSort();
   }
 
   function actualizarBoton() {
