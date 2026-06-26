@@ -15,16 +15,16 @@
   <style>
     body, .page { background: #1a1a2e; overflow: hidden; }
 
-    /* ── Layout principal ── */
     .content-area {
       flex: 1;
+      width: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       padding: 0;
     }
 
-    /* ── Barra de firmantes (top) ── */
+    /* ── Barra de firmantes ── */
     .signers-bar {
       background: #fff;
       border-bottom: 1px solid var(--border-hdr);
@@ -36,8 +36,15 @@
       scrollbar-width: none;
       flex-shrink: 0;
     }
-
     .signers-bar::-webkit-scrollbar { display: none; }
+
+    .bar-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 500;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
 
     .signer-chip {
       display: flex;
@@ -52,57 +59,25 @@
       transition: border-color .15s, background .15s;
       flex-shrink: 0;
     }
-
-    .signer-chip.active {
-      border-color: var(--blue);
-      background: #f0f2ff;
-    }
-
-    .signer-chip.placed {
-      border-color: #22c55e;
-      background: #f0fdf4;
-    }
+    .signer-chip.active  { border-color: var(--blue); background: #f0f2ff; }
+    .signer-chip.placed  { border-color: #22c55e; background: #f0fdf4; }
 
     .chip-num {
-      width: 22px;
-      height: 22px;
+      width: 22px; height: 22px;
       border-radius: 50%;
       background: var(--blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 11px;
-      color: #fff;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 11px; color: #fff; flex-shrink: 0;
     }
-
     .signer-chip.placed .chip-num { background: #16a34a; }
 
     .chip-email {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-main);
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 12px; font-weight: 500; color: var(--text-main);
+      max-width: 140px; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .chip-check {
-      font-size: 14px;
-      color: #16a34a;
-      display: none;
-    }
-
+    .chip-check { font-size: 14px; color: #16a34a; display: none; }
     .signer-chip.placed .chip-check { display: block; }
-
-    .bar-label {
-      font-size: 12px;
-      color: var(--text-sub);
-      font-weight: 500;
-      flex-shrink: 0;
-      margin-right: 4px;
-    }
 
     /* ── Área del documento ── */
     .doc-area {
@@ -116,19 +91,37 @@
       padding: 16px;
     }
 
+    /* Wrapper que escala todo junto (iframe + overlay) */
+    .doc-scaler {
+      transform-origin: center center;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+
+    /* Tarjeta del documento */
     .doc-card {
-      width: 295px;
-      height: 416px;
+      width: 320px;
+      height: 452px;
       background: #fff;
       border: 0.5px solid #dee2e6;
       border-radius: 2px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,.4);
-      flex-shrink: 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45);
     }
 
-    /* Mock PDF content */
+    /* iframe ocupa todo el card */
+    #pdf-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #fff;
+    }
+
+    /* Fallback cuando no hay PDF */
     .doc-mock {
       position: absolute;
       inset: 0;
@@ -136,249 +129,155 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      pointer-events: none;
     }
-
-    .doc-mock-line {
-      height: 8px;
-      border-radius: 2px;
-      background: #e8e9f0;
-    }
-
-    .doc-mock-line.title { height: 14px; width: 60%; background: #d0d2df; }
-    .doc-mock-line.short { width: 45%; }
+    .doc-mock-line { height: 8px; border-radius: 2px; background: #e8e9f0; }
+    .doc-mock-line.title  { height: 14px; width: 60%; background: #d0d2df; }
+    .doc-mock-line.short  { width: 45%; }
     .doc-mock-line.medium { width: 75%; }
-    .doc-mock-line.long { width: 92%; }
+    .doc-mock-line.long   { width: 92%; }
+    .doc-mock-block { margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
 
-    .doc-mock-block {
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    /* Overlay transparente — recibe los drops */
+    .sig-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
     }
 
-    /* ── Zonas de firma en el documento ── */
+    /* ── Zonas de firma ── */
     .stamp-zone {
       position: absolute;
       border: 2px dashed var(--blue);
       border-radius: 3px;
-      background: rgba(42,57,208,.08);
+      background: rgba(42,57,208,.10);
       cursor: move;
       touch-action: none;
       min-width: 90px;
       min-height: 50px;
-      display: flex;
-      flex-direction: column;
+      pointer-events: all;
     }
-
-    .stamp-zone.active-zone {
-      border-color: var(--blue);
-      background: rgba(42,57,208,.12);
-      z-index: 20;
-    }
-
     .stamp-zone.inactive-zone {
       border-color: #22c55e;
-      background: rgba(34,197,94,.08);
+      background: rgba(34,197,94,.09);
       cursor: default;
+      pointer-events: none;
     }
 
     .zone-label {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      display: flex; align-items: center; gap: 4px;
       padding: 3px 6px;
       background: var(--blue);
       border-radius: 2px 2px 0 0;
       flex-shrink: 0;
     }
-
     .stamp-zone.inactive-zone .zone-label { background: #16a34a; }
 
     .zone-num {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
+      width: 14px; height: 14px; border-radius: 50%;
       background: rgba(255,255,255,.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
     }
-
     .zone-email {
-      font-size: 9px;
-      color: rgba(255,255,255,.9);
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
+      font-size: 9px; color: rgba(255,255,255,.9);
+      flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }
 
-    /* Handles de resize */
+    /* Handles resize */
     .handle {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 10px; height: 10px;
       background: #fff;
       border: 2px solid var(--blue);
       border-radius: 2px;
       z-index: 5;
+      pointer-events: all;
     }
-
     .stamp-zone.inactive-zone .handle { border-color: #16a34a; }
-
-    .handle.tl { top: -5px; left: -5px; cursor: nwse-resize; }
-    .handle.tr { top: -5px; right: -5px; cursor: nesw-resize; }
+    .handle.tl { top: -5px; left: -5px;   cursor: nwse-resize; }
+    .handle.tr { top: -5px; right: -5px;  cursor: nesw-resize; }
     .handle.bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
     .handle.br { bottom: -5px; right: -5px; cursor: nwse-resize; }
 
-    /* ── Tooltip de instrucción ── */
+    /* ── Controls pill (zoom) ── */
+    .controls-pill {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: rgba(255,255,255,.95);
+      border-radius: 999px;
+      padding: 6px 10px;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      z-index: 30;
+    }
+    .ctrl-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border); background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .15s;
+    }
+    .ctrl-btn:hover { background: var(--bg-sidebar); }
+    .ctrl-btn .icon { font-size: 16px; color: var(--text-main); }
+    .ctrl-label { font-size: 12px; font-weight: 600; color: var(--text-main); min-width: 36px; text-align: center; }
+
+    /* ── Tip inferior ── */
     .instruction-tip {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
+      bottom: 20px; left: 50%;
       transform: translateX(-50%);
       background: rgba(26,26,46,.85);
       backdrop-filter: blur(4px);
       border-radius: 8px;
       padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
       white-space: nowrap;
       z-index: 30;
       transition: opacity .3s;
     }
-
     .instruction-tip.hidden { opacity: 0; pointer-events: none; }
-
     .instruction-tip .icon { color: #fff; font-size: 18px; }
     .instruction-tip p { font-size: 12px; color: rgba(255,255,255,.9); margin: 0; }
 
-    /* ── Controls pill ── */
-    .controls-pill {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(255,255,255,.95);
-      border-radius: 999px;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
-      z-index: 30;
+    /* ── Coachmark ── */
+    .coachmark {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; cursor: pointer;
     }
-
-    .ctrl-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background .15s;
+    .coachmark.hidden { display: none; }
+    .coach-card {
+      background: #fff; border-radius: 12px; padding: 20px;
+      max-width: 280px; display: flex; flex-direction: column; gap: 12px;
+      cursor: default;
     }
-
-    .ctrl-btn:hover { background: var(--bg-sidebar); }
-    .ctrl-btn .icon { font-size: 16px; color: var(--text-main); }
-
-    .ctrl-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--border);
+    .coach-title { font-weight: 700; font-size: 16px; color: var(--text-dark); }
+    .coach-body  { font-size: 14px; line-height: 20px; color: var(--text-sub); }
+    .coach-footer { display: flex; justify-content: flex-end; }
+    .btn-coach {
+      height: 36px; padding: 0 20px; background: var(--blue); border-radius: 20px;
+      font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; color: #fff;
+      cursor: pointer; transition: opacity .15s;
     }
-
-    .ctrl-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-main);
-      min-width: 30px;
-      text-align: center;
-    }
+    .btn-coach:hover { opacity: .9; }
 
     /* ── Bottom bar ── */
     .bottom-bar {
       background: #fff;
       border-top: 1px solid var(--border-hdr);
       padding: 12px 16px;
-      display: flex;
-      gap: 10px;
-      flex-shrink: 0;
+      display: flex; gap: 10px; flex-shrink: 0;
     }
-
     .bottom-bar button { flex: 1; }
-
-    /* ── Coachmark overlay ── */
-    .coachmark {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      cursor: pointer;
-    }
-
-    .coachmark.hidden { display: none; }
-
-    .coach-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 280px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      cursor: default;
-    }
-
-    .coach-title {
-      font-weight: 700;
-      font-size: 16px;
-      color: var(--text-dark);
-    }
-
-    .coach-body {
-      font-size: 14px;
-      line-height: 20px;
-      color: var(--text-sub);
-    }
-
-    .coach-footer {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .btn-coach {
-      height: 36px;
-      padding: 0 20px;
-      background: var(--blue);
-      border-radius: 20px;
-      font-family: 'Open Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: #fff;
-      cursor: pointer;
-      transition: opacity .15s;
-    }
-
-    .btn-coach:hover { opacity: .9; }
   </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- ── HEADER ── -->
+  <!-- HEADER -->
   <header class="header" style="background:#fff">
     <img class="header-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
     <span class="header-title">Ubicar firmas</span>
@@ -387,98 +286,86 @@
     </button>
   </header>
 
-  <!-- ── Barra de firmantes ── -->
+  <!-- BARRA DE FIRMANTES -->
   <div class="signers-bar" id="signers-bar">
     <span class="bar-label">Firmante:</span>
-    <!-- chips poblados por JS -->
   </div>
 
-  <!-- ── Área principal ── -->
+  <!-- ÁREA PRINCIPAL -->
   <main class="content-area">
     <div class="doc-area" id="doc-area">
 
-      <!-- Controles de zoom y página -->
+      <!-- Zoom -->
       <div class="controls-pill">
-        <button class="ctrl-btn" onclick="zoomOut()" aria-label="Alejar">
-          <span class="icon">remove</span>
-        </button>
+        <button class="ctrl-btn" onclick="zoomOut()"><span class="icon">remove</span></button>
         <span class="ctrl-label" id="zoom-label">100%</span>
-        <button class="ctrl-btn" onclick="zoomIn()" aria-label="Acercar">
-          <span class="icon">add</span>
-        </button>
-        <div class="ctrl-divider"></div>
-        <button class="ctrl-btn" onclick="prevPage()" aria-label="Página anterior">
-          <span class="icon">chevron_left</span>
-        </button>
-        <span class="ctrl-label" id="page-label">1/2</span>
-        <button class="ctrl-btn" onclick="nextPage()" aria-label="Página siguiente">
-          <span class="icon">chevron_right</span>
-        </button>
+        <button class="ctrl-btn" onclick="zoomIn()"><span class="icon">add</span></button>
       </div>
 
-      <!-- Documento mock -->
-      <div class="doc-card" id="doc-card">
-        <!-- Contenido mock del PDF -->
-        <div class="doc-mock">
-          <div class="doc-mock-line title"></div>
-          <div class="doc-mock-block">
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line medium"></div>
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line short"></div>
+      <!-- Scaler: escala iframe + overlay juntos -->
+      <div class="doc-scaler" id="doc-scaler">
+        <div class="doc-card" id="doc-card">
+
+          <!-- iframe del PDF (se oculta si no hay blob URL) -->
+          <iframe id="pdf-frame" src="" title="Previsualización del documento"></iframe>
+
+          <!-- Fallback mock (se muestra si no hay PDF cargado) -->
+          <div class="doc-mock" id="doc-mock" style="display:none">
+            <div class="doc-mock-line title"></div>
+            <div class="doc-mock-block">
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line medium"></div>
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line short"></div>
+            </div>
+            <div class="doc-mock-block">
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line medium"></div>
+            </div>
+            <div class="doc-mock-block">
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line short"></div>
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line medium"></div>
+            </div>
+            <div class="doc-mock-block">
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line long"></div>
+              <div class="doc-mock-line short"></div>
+            </div>
           </div>
-          <div class="doc-mock-block">
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line medium"></div>
-          </div>
-          <div class="doc-mock-block">
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line short"></div>
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line medium"></div>
-          </div>
-          <div class="doc-mock-block">
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line long"></div>
-            <div class="doc-mock-line short"></div>
-          </div>
-          <div class="doc-mock-block">
-            <div class="doc-mock-line medium"></div>
-            <div class="doc-mock-line long"></div>
-          </div>
+
+          <!-- Overlay con las zonas de firma -->
+          <div class="sig-overlay" id="sig-overlay"></div>
+
         </div>
-        <!-- Zonas de firma insertadas por JS -->
       </div>
 
-      <!-- Tip de instrucción -->
+      <!-- Tip inferior -->
       <div class="instruction-tip" id="instruction-tip">
         <span class="icon">touch_app</span>
-        <p id="tip-text">Arrastrá para posicionar la firma de <strong id="tip-name">—</strong></p>
+        <p>Arrastrá para posicionar la firma de <strong id="tip-name">—</strong></p>
       </div>
 
     </div>
   </main>
 
-  <!-- ── Coachmark inicial ── -->
+  <!-- COACHMARK -->
   <div class="coachmark" id="coachmark" onclick="cerrarCoach(event)">
     <div class="coach-card" onclick="event.stopPropagation()">
       <p class="coach-title">Ubicá las zonas de firma</p>
-      <p class="coach-body">Cada firmante tendrá una zona en el documento. Arrastrá el recuadro para posicionarlo y estirá las esquinas para cambiar su tamaño.</p>
+      <p class="coach-body">Cada firmante tendrá su propia zona en el documento. Arrastrá el recuadro para posicionarlo y estirá las esquinas para ajustar el tamaño.</p>
       <div class="coach-footer">
         <button class="btn-coach" onclick="cerrarCoach()">Entendido</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Bottom bar ── -->
+  <!-- BOTTOM BAR -->
   <div class="bottom-bar">
-    <button class="btn-outline" onclick="window.history.back()">
-      <span>Volver</span>
-    </button>
-    <button class="btn-submit" id="btn-continuar" onclick="continuar()">
-      <span>Continuar</span>
-    </button>
+    <button class="btn-outline" onclick="window.history.back()"><span>Volver</span></button>
+    <button class="btn-submit" id="btn-continuar" onclick="continuar()"><span>Continuar</span></button>
   </div>
 
 </div>
@@ -487,31 +374,44 @@
   const COLORS = ['#2A39D0', '#0f766e', '#7c3aed', '#b45309', '#be123c', '#0369a1'];
 
   let firmantes = [];
-  let zonas = {};    // { idx: { x, y, w, h } }
+  let zonas     = {};   // { idx: { x, y, w, h } }
   let activeIdx = 0;
-  let zoom = 1;
-  let currentPage = 1;
-  const totalPages = 2;
+  let zoom      = 1;
 
-  // ── Init ──
+  // ── Init ──────────────────────────────────────
   function init() {
     const raw = sessionStorage.getItem('firmantes');
     firmantes = raw ? JSON.parse(raw) : [
       { email: 'isacris23@gmail.com', tieneCuenta: true },
-      { email: 'pedro@empresa.com', tieneCuenta: false },
+      { email: 'pedro@empresa.com',   tieneCuenta: false },
     ];
+
+    // Cargar PDF en iframe
+    const blobUrl = sessionStorage.getItem('doc_blob_url');
+    const frame   = document.getElementById('pdf-frame');
+    const mock    = document.getElementById('doc-mock');
+
+    if (blobUrl) {
+      frame.src = blobUrl;
+      mock.style.display = 'none';
+    } else {
+      frame.style.display = 'none';
+      mock.style.display  = 'flex';
+    }
 
     renderChips();
     setActive(0);
   }
 
+  // ── Chips ──────────────────────────────────────
   function renderChips() {
     const bar = document.getElementById('signers-bar');
-    // Limpiar excepto el label
     bar.innerHTML = '<span class="bar-label">Firmante:</span>';
     firmantes.forEach((f, i) => {
       const chip = document.createElement('div');
-      chip.className = 'signer-chip' + (zonas[i] ? ' placed' : '') + (i === activeIdx ? ' active' : '');
+      chip.className = 'signer-chip' +
+        (zonas[i] ? ' placed' : '') +
+        (i === activeIdx ? ' active' : '');
       chip.id = 'chip-' + i;
       chip.onclick = () => setActive(i);
       chip.innerHTML = `
@@ -527,45 +427,32 @@
     activeIdx = idx;
     renderChips();
     actualizarTip();
+    if (!zonas[idx]) crearZona(idx);
+    renderZonas();
     actualizarBoton();
-
-    // Si ya tiene zona, no crear nueva
-    if (!zonas[idx]) {
-      crearZona(idx);
-    }
-    // Resaltar zona activa
-    document.querySelectorAll('.stamp-zone').forEach(z => {
-      const zi = parseInt(z.dataset.idx);
-      z.classList.toggle('active-zone', zi === idx);
-      z.classList.toggle('inactive-zone', zi !== idx);
-    });
   }
 
+  // ── Zonas ──────────────────────────────────────
   function crearZona(idx) {
     const card = document.getElementById('doc-card');
-    const cardRect = card.getBoundingClientRect();
-
-    // Posición inicial escalonada
-    const startX = 20 + (idx * 10);
-    const startY = 280 - (idx * 60);
-
-    zonas[idx] = { x: startX, y: Math.max(startY, 20), w: 120, h: 52 };
-    renderZonas();
+    // Posición inicial escalonada para no superponerse
+    const startX = 20 + (idx % 2) * 130;
+    const startY = Math.max(20, card.offsetHeight - 140 - idx * 60);
+    zonas[idx] = { x: startX, y: startY, w: 130, h: 56 };
   }
 
   function renderZonas() {
-    const card = document.getElementById('doc-card');
-    // Remover zonas existentes
-    card.querySelectorAll('.stamp-zone').forEach(z => z.remove());
+    const overlay = document.getElementById('sig-overlay');
+    overlay.innerHTML = '';
 
     Object.entries(zonas).forEach(([idxStr, pos]) => {
-      const idx = parseInt(idxStr);
-      const f = firmantes[idx];
-      const color = COLORS[idx % COLORS.length];
+      const idx     = parseInt(idxStr);
+      const f       = firmantes[idx];
+      const color   = COLORS[idx % COLORS.length];
       const isActive = idx === activeIdx;
 
       const zone = document.createElement('div');
-      zone.className = 'stamp-zone ' + (isActive ? 'active-zone' : 'inactive-zone');
+      zone.className = 'stamp-zone ' + (isActive ? '' : 'inactive-zone');
       zone.dataset.idx = idx;
       zone.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;height:${pos.h}px;`;
 
@@ -583,173 +470,116 @@
       if (isActive) {
         makeDraggable(zone, idx);
         makeResizable(zone, idx);
-        zone.addEventListener('mousedown', e => { if (!e.target.dataset.corner) setActive(idx); });
-        zone.addEventListener('touchstart', e => { if (!e.target.dataset.corner) setActive(idx); }, { passive: true });
+        zone.addEventListener('pointerdown', e => {
+          if (!e.target.dataset.corner) setActive(idx);
+        });
+      } else {
+        zone.addEventListener('pointerdown', () => setActive(idx));
       }
 
-      card.appendChild(zone);
+      overlay.appendChild(zone);
     });
   }
 
-  // ── Drag ──
+  // ── Drag ──────────────────────────────────────
   function makeDraggable(el, idx) {
-    let startX, startY, startLeft, startTop;
+    let sx, sy, sl, st;
 
     function onStart(e) {
       if (e.target.dataset.corner) return;
       e.preventDefault();
       const pt = e.touches ? e.touches[0] : e;
-      startX = pt.clientX;
-      startY = pt.clientY;
-      startLeft = zonas[idx].x;
-      startTop = zonas[idx].y;
-
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onEnd);
-      document.addEventListener('touchmove', onMove, { passive: false });
-      document.addEventListener('touchend', onEnd);
+      sx = pt.clientX; sy = pt.clientY;
+      sl = zonas[idx].x; st = zonas[idx].y;
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onEnd);
     }
 
     function onMove(e) {
-      e.preventDefault();
-      const pt = e.touches ? e.touches[0] : e;
-      const dx = pt.clientX - startX;
-      const dy = pt.clientY - startY;
-
+      const dx = e.clientX - sx;
+      const dy = e.clientY - sy;
       const card = document.getElementById('doc-card');
-      const maxX = card.offsetWidth - zonas[idx].w;
-      const maxY = card.offsetHeight - zonas[idx].h;
-
-      zonas[idx].x = Math.max(0, Math.min(maxX, startLeft + dx));
-      zonas[idx].y = Math.max(0, Math.min(maxY, startTop + dy));
-
+      zonas[idx].x = Math.max(0, Math.min(card.offsetWidth  - zonas[idx].w, sl + dx));
+      zonas[idx].y = Math.max(0, Math.min(card.offsetHeight - zonas[idx].h, st + dy));
       el.style.left = zonas[idx].x + 'px';
-      el.style.top = zonas[idx].y + 'px';
+      el.style.top  = zonas[idx].y + 'px';
     }
 
     function onEnd() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onEnd);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onEnd);
     }
 
-    el.addEventListener('mousedown', onStart);
-    el.addEventListener('touchstart', onStart, { passive: false });
+    el.addEventListener('pointerdown', onStart);
   }
 
-  // ── Resize ──
+  // ── Resize ────────────────────────────────────
   function makeResizable(el, idx) {
-    el.querySelectorAll('.handle').forEach(handle => {
-      handle.addEventListener('mousedown', e => startResize(e, handle.dataset.corner, idx, el));
-      handle.addEventListener('touchstart', e => startResize(e, handle.dataset.corner, idx, el), { passive: false });
+    el.querySelectorAll('.handle').forEach(h => {
+      h.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation();
+        const corner = h.dataset.corner;
+        const sx = e.clientX, sy = e.clientY;
+        const orig = { ...zonas[idx] };
+
+        function onMove(ev) {
+          const dx = ev.clientX - sx, dy = ev.clientY - sy;
+          if (corner === 'br') {
+            zonas[idx].w = Math.max(80, orig.w + dx);
+            zonas[idx].h = Math.max(40, orig.h + dy);
+          } else if (corner === 'bl') {
+            const nw = Math.max(80, orig.w - dx);
+            zonas[idx].x = orig.x + (orig.w - nw); zonas[idx].w = nw;
+            zonas[idx].h = Math.max(40, orig.h + dy);
+          } else if (corner === 'tr') {
+            zonas[idx].w = Math.max(80, orig.w + dx);
+            const nh = Math.max(40, orig.h - dy);
+            zonas[idx].y = orig.y + (orig.h - nh); zonas[idx].h = nh;
+          } else if (corner === 'tl') {
+            const nw = Math.max(80, orig.w - dx);
+            zonas[idx].x = orig.x + (orig.w - nw); zonas[idx].w = nw;
+            const nh = Math.max(40, orig.h - dy);
+            zonas[idx].y = orig.y + (orig.h - nh); zonas[idx].h = nh;
+          }
+          el.style.cssText = `left:${zonas[idx].x}px;top:${zonas[idx].y}px;width:${zonas[idx].w}px;height:${zonas[idx].h}px;`;
+        }
+
+        function onEnd() {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onEnd);
+        }
+
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onEnd);
+      });
     });
   }
 
-  function startResize(e, corner, idx, el) {
-    e.preventDefault();
-    e.stopPropagation();
-    const pt = e.touches ? e.touches[0] : e;
-    const startX = pt.clientX;
-    const startY = pt.clientY;
-    const orig = { ...zonas[idx] };
-
-    function onMove(ev) {
-      ev.preventDefault();
-      const p = ev.touches ? ev.touches[0] : ev;
-      const dx = p.clientX - startX;
-      const dy = p.clientY - startY;
-      const card = document.getElementById('doc-card');
-
-      if (corner === 'br') {
-        zonas[idx].w = Math.max(80, orig.w + dx);
-        zonas[idx].h = Math.max(40, orig.h + dy);
-      } else if (corner === 'bl') {
-        const newW = Math.max(80, orig.w - dx);
-        zonas[idx].x = orig.x + (orig.w - newW);
-        zonas[idx].w = newW;
-        zonas[idx].h = Math.max(40, orig.h + dy);
-      } else if (corner === 'tr') {
-        zonas[idx].w = Math.max(80, orig.w + dx);
-        const newH = Math.max(40, orig.h - dy);
-        zonas[idx].y = orig.y + (orig.h - newH);
-        zonas[idx].h = newH;
-      } else if (corner === 'tl') {
-        const newW = Math.max(80, orig.w - dx);
-        zonas[idx].x = orig.x + (orig.w - newW);
-        zonas[idx].w = newW;
-        const newH = Math.max(40, orig.h - dy);
-        zonas[idx].y = orig.y + (orig.h - newH);
-        zonas[idx].h = newH;
-      }
-
-      el.style.cssText = `left:${zonas[idx].x}px;top:${zonas[idx].y}px;width:${zonas[idx].w}px;height:${zonas[idx].h}px;`;
-    }
-
-    function onEnd() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onEnd);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onEnd);
-    }
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
-  }
-
-  // ── Zoom ──
-  function zoomIn() {
-    zoom = Math.min(2, zoom + 0.25);
-    applyZoom();
-  }
-
-  function zoomOut() {
-    zoom = Math.max(0.5, zoom - 0.25);
-    applyZoom();
-  }
+  // ── Zoom ──────────────────────────────────────
+  function zoomIn()  { zoom = Math.min(2.0, zoom + 0.25); applyZoom(); }
+  function zoomOut() { zoom = Math.max(0.5, zoom - 0.25); applyZoom(); }
 
   function applyZoom() {
-    document.getElementById('doc-card').style.transform = `scale(${zoom})`;
+    document.getElementById('doc-scaler').style.transform = `scale(${zoom})`;
     document.getElementById('zoom-label').textContent = Math.round(zoom * 100) + '%';
   }
 
-  // ── Páginas ──
-  function prevPage() {
-    if (currentPage <= 1) return;
-    currentPage--;
-    actualizarPagina();
-  }
-
-  function nextPage() {
-    if (currentPage >= totalPages) return;
-    currentPage++;
-    actualizarPagina();
-  }
-
-  function actualizarPagina() {
-    document.getElementById('page-label').textContent = `${currentPage}/${totalPages}`;
-  }
-
-  // ── Tip ──
+  // ── Tip ───────────────────────────────────────
   function actualizarTip() {
     const f = firmantes[activeIdx];
-    if (f) {
-      document.getElementById('tip-name').textContent = f.email.split('@')[0];
-    }
+    if (f) document.getElementById('tip-name').textContent = f.email.split('@')[0];
   }
 
-  // ── Coachmark ──
+  // ── Coachmark ─────────────────────────────────
   function cerrarCoach(e) {
     if (e && e.target !== document.getElementById('coachmark')) return;
     document.getElementById('coachmark').classList.add('hidden');
   }
 
-  // ── Botón continuar ──
+  // ── Continuar ─────────────────────────────────
   function actualizarBoton() {
-    const todosColocados = firmantes.every((_, i) => zonas[i]);
-    document.getElementById('btn-continuar').classList.toggle('active', todosColocados);
+    const ok = firmantes.every((_, i) => zonas[i]);
+    document.getElementById('btn-continuar').classList.toggle('active', ok);
   }
 
   function continuar() {
