@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Cargar documento | FID by Lakaut</title>
+  <title>Nuevo envío | FID by Lakaut</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
@@ -11,184 +11,149 @@
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/header.css" />
   <link rel="stylesheet" href="assets/css/buttons.css" />
+  <link rel="stylesheet" href="assets/css/inputs.css" />
 
   <style>
     body, .page { background: #f8f9fa; }
 
-    /* ── Upload card ── */
-    .upload-card {
-      border: 1.5px dashed var(--border);
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 8px;
+    }
+
+    /* ── Drop area (patrón flujo jurídica) ── */
+    .drop-area {
+      background: #fff;
+      border: 1px dashed var(--border);
       border-radius: 12px;
-      padding: 40px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      transition: border-color .15s, background .15s;
-      cursor: pointer;
-    }
-
-    .upload-card.drag-over {
-      border-color: var(--blue);
-      background: #f5f6ff;
-    }
-
-    .upload-card.error-state {
-      border-color: #ef4444;
-    }
-
-    .upload-state {
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 8px;
-      width: 100%;
+      transition: border-color .2s, background .2s;
+    }
+    .drop-area.dragover  { border-color: var(--blue); background: #f0f2ff; border-style: solid; }
+    .drop-area.has-file  { border-style: solid; border-color: var(--border); }
+    .drop-area.error     { border-style: solid; border-color: #ef4444; background: #fff5f5; }
+
+    .drop-hint { font-size: 13px; color: var(--text-sub); text-align: center; }
+
+    .btn-upload {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 14px; cursor: pointer; align-self: center;
+      font-family: 'Inter', sans-serif; transition: background .15s;
+    }
+    .btn-upload:hover { background: var(--bg-sidebar); }
+    .btn-upload .label { font-weight: 500; font-size: 13px; color: var(--text-main); }
+    .btn-upload .icon  { font-size: 16px; color: var(--text-main); }
+
+    .file-row { display: none; align-items: center; gap: 12px; }
+    .file-row.visible { display: flex; }
+
+    .file-icon-wrap.loading { font-size: 20px; color: #aab0c0; }
+    .file-icon-wrap.done {
+      width: 36px; height: 36px;
+      background: #f1fff8; border: 1px solid #ace1c6; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
-    .upload-state.hidden { display: none; }
+    .file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .file-name { font-weight: 500; font-size: 13px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* empty */
-    .upload-icon {
-      font-size: 44px;
-      color: #adb0c0;
-      display: block;
-      margin-bottom: 4px;
+    .file-progress-wrap { width: 100%; height: 4px; background: #e8e8ee; border-radius: 4px; overflow: hidden; }
+    .file-progress-bar  { height: 100%; background: #22c55e; border-radius: 4px; width: 0%; transition: width .1s linear; }
+
+    .file-loading-text { font-size: 12px; color: var(--text-sub); }
+    .file-done-text    { font-size: 12px; color: #16a34a; display: none; }
+
+    .btn-remove {
+      flex-shrink: 0; color: #aab0c0; display: flex; align-items: center;
+      background: none; border: none; padding: 0; cursor: pointer; transition: color .15s;
+    }
+    .btn-remove:hover { color: #ef4444; }
+    .btn-remove .icon { font-size: 20px; }
+
+    .drop-error-msg { display: none; align-items: center; gap: 6px; font-size: 12px; color: #ef4444; margin-top: 4px; }
+    .drop-error-msg.visible { display: flex; }
+    .drop-error-msg .icon { font-size: 14px; flex-shrink: 0; }
+
+    /* ── Firmantes ── */
+    .add-signer-row { display: flex; gap: 8px; align-items: flex-start; }
+    .add-signer-row .input-wrap { flex: 1; }
+
+    .btn-add {
+      height: 56px; width: 56px; background: var(--blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity .15s;
+    }
+    .btn-add:hover { opacity: .9; }
+    .btn-add .icon { color: #fff; font-size: 22px; }
+
+    .verify-pill {
+      display: none; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-sub);
+      padding: 4px 10px; background: #f0f2f4; border-radius: 999px;
+    }
+    .verify-pill.visible { display: inline-flex; }
+    .verify-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+    .field-error { display: none; align-items: center; gap: 4px; font-size: 12px; color: #d0370a; }
+    .field-error.visible { display: flex; }
+    .field-error .icon { font-size: 14px; }
+
+    .signer-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .signer-item {
+      background: #fff; border: 1px solid var(--border-card);
+      border-radius: 10px; padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .signer-item.dragging  { opacity: .4; }
+    .signer-item.drag-over { border-color: var(--blue); background: #f0f2ff; }
+
+    .signer-order {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-weight: 700; font-size: 12px; color: #fff;
     }
 
-    .upload-hint-title {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text-main);
-      text-align: center;
+    .signer-info { flex: 1; min-width: 0; }
+    .signer-email { font-weight: 500; font-size: 13px; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .signer-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; margin-top: 2px;
     }
+    .signer-badge.has-cert { background: #e6f7ee; color: #1a7a45; }
+    .signer-badge.no-cert  { background: #fff3e0; color: #b45309; }
+    .signer-badge .icon { font-size: 12px; }
 
-    .upload-hint-sub {
-      font-size: 12px;
-      color: var(--text-sub);
-      text-align: center;
-      line-height: 1.5;
+    .signer-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .drag-handle { display: flex; align-items: center; padding: 4px; color: #b0b5c8; cursor: grab; touch-action: none; }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle .icon { font-size: 20px; }
+
+    .signer-remove {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid #fcc; background: #fff;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
     }
+    .signer-remove:hover { background: #fff0f0; }
+    .signer-remove .icon { font-size: 18px; color: #d0370a; }
 
-    .upload-btn {
-      margin-top: 8px;
-      height: 36px;
-      padding: 0 24px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-main);
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: background .15s;
+    .info-note {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: #f0f4ff; border-radius: 8px; padding: 10px 12px;
     }
-
-    .upload-btn:hover { background: var(--bg-sidebar); }
-
-    /* loading */
-    .upload-loading-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-main);
-      text-align: center;
-    }
-
-    .upload-filename {
-      font-size: 13px;
-      color: var(--text-sub);
-      text-align: center;
-      max-width: 100%;
-      word-break: break-all;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .upload-filesize {
-      font-size: 12px;
-      color: #adb0c0;
-      text-align: center;
-    }
-
-    .upload-progress-bar {
-      width: 100%;
-      height: 5px;
-      background: #e8e9f0;
-      border-radius: 100px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .upload-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #22c55e;
-      border-radius: 100px;
-      transition: width .1s linear;
-    }
-
-    /* success */
-    .upload-success-icon {
-      font-size: 48px;
-      color: #16a34a;
-      margin-bottom: 4px;
-    }
-
-    .upload-success-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #16a34a;
-      text-align: center;
-    }
-
-    .upload-btn-link {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      height: 36px;
-      padding: 0 24px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-main);
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      margin-top: 8px;
-      transition: background .15s;
-    }
-
-    .upload-btn-link:hover { background: var(--bg-sidebar); }
-
-    /* error */
-    .upload-error-icon {
-      font-size: 48px;
-      color: #ef4444;
-      margin-bottom: 4px;
-    }
-
-    .upload-error-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ef4444;
-      text-align: center;
-    }
-
-    .upload-error-msg {
-      font-size: 13px;
-      color: #ef4444;
-      line-height: 1.5;
-      margin-top: 4px;
-    }
-
-    .upload-error-msg.hidden { display: none; }
-
-    /* ── Footer actions ── */
-    .footer-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .info-note .icon { font-size: 16px; color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+    .info-note p { font-size: 13px; line-height: 18px; color: #3b3a45; margin: 0; }
 
     .footer-actions button { width: 100%; }
   </style>
@@ -196,77 +161,83 @@
 <body>
 <div class="page">
 
-  <!-- ── HEADER ── -->
   <header class="header">
     <img class="header-logo" src="assets/icons/logo-fid.svg" alt="FID by Lakaut" />
-    <span class="header-title">Subir documento</span>
+    <span class="header-title">Nuevo envío para firma</span>
     <button class="icon-btn" aria-label="Cerrar" onclick="window.location.href='index.html'">
       <span class="icon">close</span>
     </button>
   </header>
 
-  <!-- ── CONTENT ── -->
   <main class="content-area">
   <div class="card-wrap">
     <div class="main-card">
 
       <div class="title-section">
-        <h1 class="card-title">Cargá tu documento</h1>
-        <p class="card-subtitle">El documento será enviado a los firmantes en el orden que definas. Solo se aceptan archivos PDF de hasta 50 MB.</p>
+        <h1 class="card-title">Invitá a firmar un documento</h1>
+        <p class="card-subtitle">Subí el PDF y agregá a las personas que necesitan firmarlo. Las firmas se realizan en secuencia, en el orden que definás.</p>
       </div>
 
-      <!-- Upload zone -->
-      <div
-        class="upload-card"
-        id="uploadCard"
-        onclick="onCardClick(event)"
-        ondragover="onDragOver(event)"
-        ondragleave="onDragLeave(event)"
-        ondrop="onDrop(event)"
-      >
-        <!-- Estado: vacío -->
-        <div class="upload-state" id="ustate-empty">
-          <span class="icon upload-icon">upload_file</span>
-          <p class="upload-hint-title">Elegí o arrastrá un archivo</p>
-          <p class="upload-hint-sub">Formatos permitidos: PDF hasta 50 MB</p>
-          <button class="upload-btn" onclick="triggerPicker()">Seleccionar archivo</button>
-        </div>
-
-        <!-- Estado: cargando -->
-        <div class="upload-state hidden" id="ustate-loading">
-          <p class="upload-loading-title">Cargando archivo…</p>
-          <p class="upload-filename" id="uloading-name"></p>
-          <div class="upload-progress-bar">
-            <div class="upload-progress-fill" id="uProgressFill"></div>
+      <!-- ── DOCUMENTO ── -->
+      <div>
+        <p class="section-label">Documento</p>
+        <div class="drop-area" id="drop-area"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+          <p class="drop-hint" id="drop-hint">Arrastrá y soltá tu archivo aquí o presioná el botón.</p>
+          <button class="btn-upload" id="btn-upload" onclick="triggerPicker()">
+            <span class="label">Cargar archivo</span>
+            <span class="icon">upload</span>
+          </button>
+          <div class="file-row" id="file-row">
+            <span class="icon file-icon-wrap loading" id="file-icon">insert_drive_file</span>
+            <div class="file-info">
+              <span class="file-name" id="file-name"></span>
+              <div class="file-progress-wrap" id="file-progress-wrap">
+                <div class="file-progress-bar" id="file-progress-bar"></div>
+              </div>
+              <span class="file-loading-text" id="file-loading-text">Cargando archivo…</span>
+              <span class="file-done-text" id="file-done-text">Archivo cargado</span>
+            </div>
+            <button class="btn-remove" onclick="removeFile()"><span class="icon">delete</span></button>
           </div>
         </div>
-
-        <!-- Estado: éxito -->
-        <div class="upload-state hidden" id="ustate-success">
-          <span class="icon upload-success-icon">check_circle</span>
-          <p class="upload-success-title">Archivo cargado</p>
-          <p class="upload-filename" id="usuccess-name"></p>
-          <p class="upload-filesize" id="usuccess-size"></p>
-          <button class="upload-btn-link" onclick="triggerPicker()">Cargar otro archivo</button>
-        </div>
-
-        <!-- Estado: error -->
-        <div class="upload-state hidden" id="ustate-error">
-          <span class="icon upload-error-icon">cancel</span>
-          <p class="upload-error-title">Error al cargar el archivo</p>
-          <p class="upload-filename" id="uerror-name"></p>
-          <p class="upload-filesize" id="uerror-size"></p>
-          <button class="upload-btn-link" onclick="triggerPicker()">Cargar otro archivo</button>
+        <div class="drop-error-msg" id="drop-error-msg">
+          <span class="icon">error</span><span id="drop-error-text"></span>
         </div>
       </div>
 
-      <p class="upload-error-msg hidden" id="uploadErrorMsg"></p>
+      <!-- ── FIRMANTES ── -->
+      <div>
+        <p class="section-label">Orden de firma</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+          <label class="field-label" for="email-input">Correo electrónico</label>
+          <div class="add-signer-row">
+            <div class="input-wrap">
+              <span class="icon input-icon">mail</span>
+              <input id="email-input" type="email" placeholder="nombre@ejemplo.com"
+                autocomplete="off" oninput="onEmailInput()"
+                onkeydown="if(event.key==='Enter') agregarFirmante()" />
+            </div>
+            <button class="btn-add" onclick="agregarFirmante()"><span class="icon">person_add</span></button>
+          </div>
+          <span class="verify-pill" id="verify-pill">
+            <span class="verify-dot"></span>Verificando cuenta…
+          </span>
+          <span class="field-error" id="field-error">
+            <span class="icon">error</span><span id="error-text"></span>
+          </span>
+        </div>
 
-      <!-- Actions -->
+        <div class="signer-list" id="signer-list"></div>
+
+        <div class="info-note" style="margin-top:12px;">
+          <span class="icon">info</span>
+          <p>Si alguien no tiene cuenta en FID, recibirá una invitación para obtener su certificado primero.</p>
+        </div>
+      </div>
+
       <div class="footer-actions">
-        <button class="btn-submit" id="btn-continuar" onclick="continuar()">
-          <span>Continuar</span>
-        </button>
+        <button class="btn-submit" id="btn-continuar" onclick="continuar()"><span>Continuar</span></button>
       </div>
 
     </div>
@@ -276,123 +247,165 @@
     </div>
   </div>
   </main>
-
 </div>
 
-<!-- Input de archivo oculto -->
-<input type="file" id="fileInput" accept=".pdf,application/pdf" style="display:none" onchange="onFileSelected(event)" />
+<input type="file" id="file-input" accept=".pdf,application/pdf" style="display:none" onchange="onFileSelected(event)" />
 
 <script>
-  let _progressTimer = null;
+  const cuentasConocidas = ['isacris23@gmail.com','test@fid.com','usuario@acab.gob.ar','enrique@lakaut.com'];
+  let docSubido  = false;
+  let firmantes  = [];
+  let verifyTimer = null;
+  let dragSrcIdx  = null;
 
-  function _showState(id) {
-    ['ustate-empty', 'ustate-loading', 'ustate-success', 'ustate-error'].forEach(s => {
-      document.getElementById(s).classList.toggle('hidden', s !== id);
+  // ── Upload ──────────────────────────────
+  function triggerPicker() { document.getElementById('file-input').click(); }
+
+  function onDragOver(e) { e.preventDefault(); if (!docSubido) document.getElementById('drop-area').classList.add('dragover'); }
+  function onDragLeave() { document.getElementById('drop-area').classList.remove('dragover'); }
+  function onDrop(e)     { e.preventDefault(); onDragLeave(); if (!docSubido && e.dataTransfer.files[0]) procesarArchivo(e.dataTransfer.files[0]); }
+  function onFileSelected(e) { const f = e.target.files[0]; e.target.value = ''; if (f) procesarArchivo(f); }
+
+  function procesarArchivo(file) {
+    clearDocError();
+    const name   = file.name;
+    const sizeMB = file.size / (1024 * 1024);
+    const isPdf  = file.type === 'application/pdf' || name.toLowerCase().endsWith('.pdf');
+    if (!isPdf)    { showDocError('El formato debe ser PDF.'); return; }
+    if (sizeMB>50) { showDocError('El archivo supera 50 MB.'); return; }
+
+    const prevUrl = sessionStorage.getItem('doc_blob_url');
+    if (prevUrl) URL.revokeObjectURL(prevUrl);
+    sessionStorage.setItem('doc_blob_url', URL.createObjectURL(file));
+    sessionStorage.setItem('doc_name', name);
+    sessionStorage.setItem('doc_size', sizeMB >= 1 ? sizeMB.toFixed(1) + ' MB' : Math.round(file.size/1024) + ' KB');
+
+    document.getElementById('drop-area').classList.add('has-file');
+    document.getElementById('drop-hint').style.display  = 'none';
+    document.getElementById('btn-upload').style.display = 'none';
+    document.getElementById('file-row').classList.add('visible');
+    document.getElementById('file-name').textContent = name;
+
+    const bar = document.getElementById('file-progress-bar');
+    bar.style.width = '0%';
+    let pct = 0;
+    const t = setInterval(() => {
+      pct += Math.random() * 18 + 8;
+      if (pct >= 100) { pct = 100; clearInterval(t); finishUpload(); }
+      bar.style.width = pct + '%';
+    }, 120);
+  }
+
+  function finishUpload() {
+    docSubido = true;
+    const iconEl = document.getElementById('file-icon');
+    iconEl.classList.remove('icon','loading'); iconEl.classList.add('done');
+    iconEl.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L9.5 17L19 8" stroke="#108F50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    document.getElementById('file-progress-wrap').style.display = 'none';
+    document.getElementById('file-loading-text').style.display  = 'none';
+    document.getElementById('file-done-text').style.display     = 'block';
+    actualizarBoton();
+  }
+
+  function removeFile() {
+    docSubido = false;
+    const drop = document.getElementById('drop-area');
+    drop.classList.remove('has-file','error');
+    document.getElementById('drop-hint').style.display  = '';
+    document.getElementById('btn-upload').style.display = '';
+    document.getElementById('file-row').classList.remove('visible');
+    const iconEl = document.getElementById('file-icon');
+    iconEl.className = 'icon file-icon-wrap loading';
+    iconEl.textContent = 'insert_drive_file';
+    document.getElementById('file-progress-wrap').style.display = '';
+    document.getElementById('file-progress-bar').style.width    = '0%';
+    document.getElementById('file-loading-text').style.display  = '';
+    document.getElementById('file-done-text').style.display     = 'none';
+    actualizarBoton();
+  }
+
+  function showDocError(msg)  { document.getElementById('drop-area').classList.add('error'); document.getElementById('drop-error-text').textContent = msg; document.getElementById('drop-error-msg').classList.add('visible'); }
+  function clearDocError()    { document.getElementById('drop-area').classList.remove('error'); document.getElementById('drop-error-msg').classList.remove('visible'); }
+
+  // ── Firmantes ────────────────────────────
+  function onEmailInput() {
+    clearTimeout(verifyTimer);
+    document.getElementById('verify-pill').classList.remove('visible');
+    document.getElementById('field-error').classList.remove('visible');
+  }
+
+  function agregarFirmante() {
+    const input = document.getElementById('email-input');
+    const email = input.value.trim().toLowerCase();
+    if (!email) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarError('Ingresá un email válido.'); return; }
+    if (firmantes.some(f => f.email === email))     { mostrarError('Este email ya fue agregado.'); return; }
+
+    document.getElementById('verify-pill').classList.add('visible');
+    input.disabled = true;
+    verifyTimer = setTimeout(() => {
+      const tieneCuenta = cuentasConocidas.includes(email);
+      document.getElementById('verify-pill').classList.remove('visible');
+      input.disabled = false;
+      firmantes.push({ email, tieneCuenta });
+      input.value = '';
+      renderFirmantes();
+      actualizarBoton();
+    }, 900);
+  }
+
+  function mostrarError(msg) {
+    document.getElementById('error-text').textContent = msg;
+    document.getElementById('field-error').classList.add('visible');
+  }
+
+  function eliminar(idx) { firmantes.splice(idx,1); renderFirmantes(); actualizarBoton(); }
+
+  function renderFirmantes() {
+    const list = document.getElementById('signer-list');
+    if (!firmantes.length) { list.innerHTML=''; return; }
+    list.innerHTML = firmantes.map((f,i) => `
+      <div class="signer-item" draggable="true" data-idx="${i}">
+        <div class="signer-order">${i+1}</div>
+        <div class="signer-info">
+          <p class="signer-email">${f.email}</p>
+          <span class="signer-badge ${f.tieneCuenta?'has-cert':'no-cert'}">
+            <span class="icon">${f.tieneCuenta?'verified':'mail'}</span>
+            ${f.tieneCuenta?'Tiene cuenta FID':'Recibirá invitación'}
+          </span>
+        </div>
+        <div class="signer-controls">
+          <div class="drag-handle"><span class="icon">drag_indicator</span></div>
+          <button class="signer-remove" onclick="eliminar(${i})"><span class="icon">delete</span></button>
+        </div>
+      </div>`).join('');
+    initDragSort();
+  }
+
+  function initDragSort() {
+    document.querySelectorAll('.signer-item[draggable]').forEach(item => {
+      item.addEventListener('dragstart', e => { dragSrcIdx=parseInt(item.dataset.idx); item.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+      item.addEventListener('dragend',   () => { item.classList.remove('dragging'); document.querySelectorAll('.signer-item').forEach(i=>i.classList.remove('drag-over')); });
+      item.addEventListener('dragover',  e => { e.preventDefault(); item.classList.add('drag-over'); });
+      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+      item.addEventListener('drop', e => {
+        e.preventDefault(); item.classList.remove('drag-over');
+        const t = parseInt(item.dataset.idx);
+        if (dragSrcIdx===null || dragSrcIdx===t) return;
+        const moved = firmantes.splice(dragSrcIdx,1)[0]; firmantes.splice(t,0,moved);
+        dragSrcIdx=null; renderFirmantes();
+      });
     });
   }
 
-  function onCardClick(e) {
-    if (e.target.closest('.upload-btn-link') || e.target.closest('.upload-btn')) return;
-    const estado = document.querySelector('.upload-state:not(.hidden)').id;
-    if (estado === 'ustate-empty') triggerPicker();
-  }
-
-  function triggerPicker(e) {
-    if (e) e.stopPropagation();
-    document.getElementById('fileInput').click();
-  }
-
-  function onDragOver(e) {
-    e.preventDefault();
-    document.getElementById('uploadCard').classList.add('drag-over');
-  }
-
-  function onDragLeave() {
-    document.getElementById('uploadCard').classList.remove('drag-over');
-  }
-
-  function onDrop(e) {
-    e.preventDefault();
-    document.getElementById('uploadCard').classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) procesarArchivo(file);
-  }
-
-  function onFileSelected(e) {
-    const file = e.target.files[0];
-    e.target.value = '';
-    if (file) procesarArchivo(file);
-  }
-
-  function procesarArchivo(file) {
-    const card = document.getElementById('uploadCard');
-    const errMsg = document.getElementById('uploadErrorMsg');
-    errMsg.classList.add('hidden');
-    card.classList.remove('error-state');
-
-    const name = file.name;
-    const sizeMB = file.size / (1024 * 1024);
-    const sizeKB = Math.round(file.size / 1024);
-    const sizeStr = sizeMB >= 1 ? sizeMB.toFixed(1) + ' MB' : sizeKB + ' KB';
-
-    const isPdf = file.type === 'application/pdf' || name.toLowerCase().endsWith('.pdf');
-    if (!isPdf) {
-      mostrarError(name, sizeStr, 'El formato del archivo debe ser PDF.');
-      return;
-    }
-
-    if (sizeMB > 50) {
-      mostrarError(name, sizeStr, 'El archivo supera el tamaño máximo. Subí un PDF de hasta 50 MB.');
-      return;
-    }
-
-    // Guardar datos del archivo en sessionStorage
-    sessionStorage.setItem('doc_name', name);
-    sessionStorage.setItem('doc_size', sizeStr);
-
-    // Simular progreso de carga
-    document.getElementById('uloading-name').textContent = name;
-    _showState('ustate-loading');
-    const fill = document.getElementById('uProgressFill');
-    fill.style.transition = 'none';
-    fill.style.width = '0%';
-    fill.offsetWidth; // forzar reflow
-    fill.style.transition = '';
-
-    let progress = 0;
-    if (_progressTimer) clearInterval(_progressTimer);
-    _progressTimer = setInterval(() => {
-      progress += Math.random() * 18 + 6;
-      if (progress >= 100) {
-        progress = 100;
-        fill.style.width = '100%';
-        clearInterval(_progressTimer);
-        setTimeout(() => {
-          document.getElementById('usuccess-name').textContent = name;
-          document.getElementById('usuccess-size').textContent = sizeStr;
-          _showState('ustate-success');
-          document.getElementById('btn-continuar').classList.add('active');
-        }, 300);
-      } else {
-        fill.style.width = progress + '%';
-      }
-    }, 100);
-  }
-
-  function mostrarError(name, sizeStr, msg) {
-    document.getElementById('uerror-name').textContent = name;
-    document.getElementById('uerror-size').textContent = sizeStr;
-    _showState('ustate-error');
-    document.getElementById('uploadCard').classList.add('error-state');
-    const errMsg = document.getElementById('uploadErrorMsg');
-    errMsg.textContent = msg;
-    errMsg.classList.remove('hidden');
-    document.getElementById('btn-continuar').classList.remove('active');
+  function actualizarBoton() {
+    document.getElementById('btn-continuar').classList.toggle('active', docSubido && firmantes.length>0);
   }
 
   function continuar() {
-    if (!document.getElementById('btn-continuar').classList.contains('active')) return;
-    window.location.href = 'invitar-firmantes.html';
+    if (!docSubido || !firmantes.length) return;
+    sessionStorage.setItem('firmantes', JSON.stringify(firmantes));
+    window.location.href = 'posicionar-firmas.html';
   }
 </script>
 </body>
