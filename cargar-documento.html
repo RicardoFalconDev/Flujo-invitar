@@ -140,6 +140,14 @@
     .drag-handle:active { cursor: grabbing; }
     .drag-handle .icon { font-size: 20px; }
 
+    .signer-edit {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: #fff;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
+    }
+    .signer-edit:hover { background: var(--bg-sidebar); }
+    .signer-edit .icon { font-size: 16px; color: var(--text-sub); }
+
     .signer-remove {
       width: 28px; height: 28px; border-radius: 6px;
       border: 1px solid #fcc; background: #fff;
@@ -359,6 +367,15 @@
     document.getElementById('field-error').classList.add('visible');
   }
 
+  function editarFirmante(idx) {
+    const input = document.getElementById('email-input');
+    input.value = firmantes[idx].email;
+    firmantes.splice(idx, 1);
+    renderFirmantes();
+    actualizarBoton();
+    input.focus();
+  }
+
   function eliminar(idx) { firmantes.splice(idx,1); renderFirmantes(); actualizarBoton(); }
 
   function renderFirmantes() {
@@ -366,6 +383,7 @@
     if (!firmantes.length) { list.innerHTML=''; return; }
     list.innerHTML = firmantes.map((f,i) => `
       <div class="signer-item" draggable="true" data-idx="${i}">
+        <div class="drag-handle"><span class="icon">drag_indicator</span></div>
         <div class="signer-order">${i+1}</div>
         <div class="signer-info">
           <p class="signer-email">${f.email}</p>
@@ -375,7 +393,7 @@
           </span>
         </div>
         <div class="signer-controls">
-          <div class="drag-handle"><span class="icon">drag_indicator</span></div>
+          <button class="signer-edit" onclick="editarFirmante(${i})" title="Editar"><span class="icon">edit</span></button>
           <button class="signer-remove" onclick="eliminar(${i})"><span class="icon">delete</span></button>
         </div>
       </div>`).join('');
